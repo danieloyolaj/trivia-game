@@ -47,3 +47,41 @@ let questions = [
 
 const SCORE_POINTS = 100;
 const MAX_QUESTIONS = 4;
+
+startGame = () => {
+  questionCounter = 0;
+  score = 0;
+  availableQuestions = [...questions] //Using the spread operator
+  getNewQuestion();
+}
+
+getNewQuestion = () => {
+  if(availableQuestions.lenght === 0 || questionCounter > MAX_QUESTIONS){
+    localStorage.setItem('mostRecentScore', score);
+    return window.location.assign('/end.html') //redirecting to the end of the game
+  }
+  questionCounter++;
+  progressText.innerHTML = `Question ${questionCounter} of ${MAX_QUESTIONS}`;
+  
+  //Here we change the progressBar according to the number of questions
+  progressBarFull.style.width = `${(questionCounter/MAX_QUESTIONS) * 100}%`;
+
+  //Every time the user begins we get a random question
+  const questionIndex = Math.floor(Math.random() * availableQuestions.lenght);
+
+  //This get the index of the question being shown
+  currentQuestion = availableQuestions[questionIndex];
+
+  //Putting the question in the HTML tag
+  question.innerText = currentQuestion.question
+
+  //Displaying the choices of the questions
+  choices.forEach(choice => {
+    const number = choice.dataset['number'];
+    choice.innerText = currentQuestion['choice' + number];
+  });
+
+  availableQuestions.splice(questionIndex, 1)
+
+  acceptingAnswers = true;
+}

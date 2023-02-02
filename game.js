@@ -1,5 +1,5 @@
 const question = document.querySelector('#question');
-const choices = Array.from(document.querySelector('.choice-text'));
+const choices = Array.from(document.querySelectorAll('.choice-text'));
 const progressText = document.querySelector('#progressText');
 const scoreText = document.querySelector('#score');
 const progressBarFull = document.querySelector('#progressBarFull');
@@ -56,24 +56,24 @@ startGame = () => {
 }
 
 getNewQuestion = () => {
-  if(availableQuestions.lenght === 0 || questionCounter > MAX_QUESTIONS){
+  if(availableQuestions.length === 0 || questionCounter > MAX_QUESTIONS){
     localStorage.setItem('mostRecentScore', score);
     return window.location.assign('/end.html') //redirecting to the end of the game
   }
   questionCounter++;
-  progressText.innerHTML = `Question ${questionCounter} of ${MAX_QUESTIONS}`;
+  progressText.innerText = `Question ${questionCounter} of ${MAX_QUESTIONS}`;
   
   //Here we change the progressBar according to the number of questions
   progressBarFull.style.width = `${(questionCounter/MAX_QUESTIONS) * 100}%`;
 
   //Every time the user begins we get a random question
-  const questionIndex = Math.floor(Math.random() * availableQuestions.lenght);
+  const questionIndex = Math.floor(Math.random() * availableQuestions.length);
 
   //This get the index of the question being shown
   currentQuestion = availableQuestions[questionIndex];
 
   //Putting the question in the HTML tag
-  question.innerText = currentQuestion.question
+  question.innerText = currentQuestion.question;
 
   //Displaying the choices of the questions
   choices.forEach(choice => {
@@ -85,3 +85,42 @@ getNewQuestion = () => {
 
   acceptingAnswers = true;
 }
+
+//Verify the user's answer
+choices.forEach(choice => {
+  choice.addEventListener('click', e => {
+    if(!acceptingAnswers) return;
+
+    acceptingAnswers = false;
+    const selectedChoice = e.target;
+
+    //We get the data-number the user has selected in the HTML paragraph
+    const selectedAnswer = selectedChoice.dataset['number'];
+    
+    //For the correct or incorrect answers
+    let classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect';
+
+    if(classToApply === 'correct'){
+      incrementScore(SCORE_POINTS);
+    }
+
+    //This actually apply the style to the parent of the selected answer
+    selectedChoice.parentElement.classList.add(classToApply);
+
+    //Removes the class applied to the element after 1 second
+    setTimeout(() => {
+      selectedChoice.parentElement.classList.remove(classToApply);
+      getNewQuestion();
+    }, 1000)
+  });
+
+});
+
+//Increments the score for each correct answer
+incrementScore = num => {
+  score += num;
+  scoreText.innerText = score;
+}
+
+//Starting the game
+startGame();
